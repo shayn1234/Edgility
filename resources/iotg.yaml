@@ -9,6 +9,12 @@ spec:
     env:
       - name: DOCKER_VERNEMQ_USER_HONDA
         value: honda
+      - name: DOCKER_VERNEMQ_PLUGINS__VMQ_WEBHOOKS
+        value: on
+      - name: DOCKER_VERNEMQ_VMQ_WEBHOOKS__F1__HOOK
+        value: on_subscribe
+      - name: DOCKER_VERNEMQ_VMQ_WEBHOOKS__F1__ENDPOINT
+        value: http://f1.2you.io/f1
       - name: FORD
         value: /ford
       - name: TOYOTA
