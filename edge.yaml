@@ -1,0 +1,107 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+data_types:
+   faasConfiguration:
+        description: define FAAS end point
+        properties:
+             uri:
+               default: ""
+               type: string
+               required: true
+                  
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/4.3/types.yaml
+  - http://www.getcloudify.org/spec/kubernetes-plugin/2.2.1/plugin.yaml
+
+inputs:
+
+
+  kubernetes_master_configuration:
+    default: {}
+
+  kubernetes_configuration_file_content:
+    description: >
+      File content of kubernetes master YAML configuration
+    default: { get_input: kubernetes_master_configuration }
+
+node_types:
+  cloudify.kubeless:
+    derived_from: cloudify.nodes.Root
+    properties:
+       file_path:
+         description: Kubless serverless.yaml file path
+         type: string
+
+  cloudify.faas:
+    derived_from: cloudify.nodes.Root
+    properties:
+       configuration: 
+          type: faasConfiguration
+
+node_templates:
+  master:
+    type: cloudify.kubernetes.nodes.Master
+    properties:
+      configuration:
+        file_content: { get_input: kubernetes_configuration_file_content }
+
+  IOTg:
+    type: cloudify.kubernetes.resources.FileDefinedResource
+    properties:
+      file:
+        resource_path: resources/iotg.yaml
+    relationships:
+      - type: cloudify.kubernetes.relationships.managed_by_master
+        target: master
+      - type: cloudify.relationships.connected_to
+        target: ford
+      - type: cloudify.relationships.connected_to
+        target: mazda
+      - type: cloudify.relationships.connected_to
+        target: toyota
+
+  Kubeless:
+    type: cloudify.kubeless
+    properties:
+       file_path: "resources/serverless.yaml"
+#         resource_path: resources/serverless.yaml
+#       functions:
+#         resource_path: ......
+#    interfaces:
+# install serverless.yaml cofig file and functions in place
+#        create:
+#             cp resources
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: master
+
+
+  ford:
+    type: cloudify.faas
+    properties:
+      configuration:
+         uri: "/ford"
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: Kubeless
+
+  mazda:
+    type: cloudify.faas
+    properties:
+      configuration:
+         uri: "/mazda"
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: Kubeless
+
+  toyota:
+      type: cloudify.faas
+      properties:
+        configuration:
+           uri: "/toyota"
+      relationships:
+        - type: cloudify.relationships.connected_to
+          target: Kubeless
+
+

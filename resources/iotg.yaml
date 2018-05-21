@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: iotg
+spec:
+  containers:
+  - name: iotg
+    image: "erlio/docker-vernemq"
+    env:
+      - name: DOCKER_VERNEMQ_USER_HONDA
+        value: honda
+      - name: FORD
+        value: /ford
+      - name: TOYOTA
+        value: /toyota
+      - name: MAZDA
+        value: /mazda
+    stdin: true
+    tty: true
+    securityContext:
+      privileged: true
